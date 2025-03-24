@@ -33,14 +33,21 @@ service cloud.firestore {
       return isAuthenticated() && request.auth.token.role == 'researcher';
     }
 
+    // Function to check if emergency access is valid (30-minute expiry)
+    function isEmergencyAccessValid(resource) {
+      return resource.data.emergency_access == true &&
+             request.time < resource.data.emergency_expiry &&
+             request.time - resource.data.emergency_granted_time < duration.value(30, "m");
+    }
+
     // Function to check if user is authorized to access a medical document
     function canAccessMedical(resource) {
-      // Ensure resource data is not null
       return resource.data != null && (
         isAdmin() || 
         (isDoctor() && request.auth.token.department == resource.data.department) ||
         (isNurse() && request.auth.token.is_trainee == false) ||
-        (isResearcher() && resource.data.can_access_research == true)
+        (isResearcher() && resource.data.can_access_research == true) ||
+        isEmergencyAccessValid(resource)  // Allow temporary emergency access for 30 minutes
       );
     }
 
