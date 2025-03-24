@@ -170,4 +170,39 @@
 - **Document Data**: Same as Scenario 3 (Neurology with can_access_research: false)
 - **Expected Result**: DENY
 
+### Scenario 8: Emergency Access Test (Any Doctor)
+- **Operation**: get
+- **Path**: `/databases/(default)/documents/medical_metadata/{docId}`
+- **Authentication**: Any Doctor
+  ```json
+  {
+  "uid": "doctor-user-789",
+  "token": {
+    "sub": "doctor-user-789",
+    "aud": "mock-project-454115",
+    "role": "doctor",
+    "department": "General Medicine",
+    "email": "doctor@hospital.com",
+    "firebase": {
+      "sign_in_provider": "custom"
+       }
+     }
+    }
+  ```
+- **Document Data**:
+  ```json
+  {
+  "file_name": "brain_scan.pdf",
+  "bucket_name": "medical-documents-bucket",
+  "department": "Neurology",
+  "clearance_level": "high",
+  "can_access_research": false,
+  "status": "AI Processed",
+  "emergency_access": true,
+  "emergency_granted_time": "2025-03-16T10:00:00Z",
+  "emergency_expiry": "2025-03-16T10:30:00Z"
+   }
+  ```
+- **Expected Result**: ALLOW (Only within 30 minutes of emergency_granted_time)
+
 3. Run each scenario and verify the expected results
